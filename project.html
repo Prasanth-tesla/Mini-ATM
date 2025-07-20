@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TESLA ATM Model</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e3f2fd;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .atm {
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      width: 450px;
+    }
+    h1 {
+      text-align: center;
+      color: #1565c0;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+    button {
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background-color: #0d47a1;
+    }
+    #output {
+      margin-top: 15px;
+      background-color: #e3f2fd;
+      padding: 10px;
+      border-radius: 5px;
+      min-height: 50px;
+      white-space: pre-line;
+    }
+    p {
+      color: blue;
+    }
+  </style>
+</head>
+<body>
+  <div class="atm">
+    <h1>TESLA ATM</h1>
+    <h1>LOGIN</h1>
+    <input type="text" id="name" placeholder="Enter your name">
+    <input type="text" id="acno" placeholder="Enter account number">
+    <input type="number" id="spin" placeholder="Set your 6-digit PIN">
+    <input type="number" id="bal" placeholder="Enter initial balance">
+    <button onclick="createaccount()">Create Account</button>
+
+    <hr>
+
+    <p>Already have an account?</p>
+    <input type="text" id="racno" placeholder="Enter registered account number">
+    <input type="number" id="rpin" placeholder="Enter your 6-digit PIN">
+    <button onclick="login()">Show my account</button>
+
+    <hr>
+
+    <input type="number" id="amount" placeholder="Enter amount">
+    <button onclick="withdraw()">Withdraw</button>
+    <button onclick="deposit()">Deposit</button>
+    <button onclick="display()">Check Balance</button>
+
+    <div id="output"></div>
+  </div>
+</body>
+
+
+  <script>
+    class Bank {
+      constructor(name, bal, no, spin) {
+        this.name = name;
+        this.bal = bal;
+        this.no = no;
+        this.spin = spin;
+      }
+
+      display() {
+        return `Welcome to TESLA Bank!\nCustomer Name: ${this.name}\nAC No: ${this.no}\nBalance: ₹${this.bal}\nThanks for banking with us!`;
+      }
+
+      withdraw(wamt) {
+        if (wamt <= this.bal) {
+          this.bal -= wamt;
+          return `Withdrawal successful: ₹${wamt}\nBalance: ₹${this.bal}`;
+        } else {
+          return `Insufficient Balance!\nYour balance is only ₹${this.bal}`;
+        }
+      }
+
+      deposit(damt) {
+        this.bal += damt;
+        return `Deposit successful!\nNew Balance: ₹${this.bal}`;
+      }
+    }
+
+    const accounts = [];
+    let useraccount = null;
+    let loggedin = false;
+
+    function createaccount() {
+      const name = document.getElementById('name').value.trim();
+      const acno = document.getElementById('acno').value.trim();
+      const spin = document.getElementById('spin').value.trim();
+      const bal = parseFloat(document.getElementById('bal').value);
+
+      if (name === '' || spin === '' || acno === '' || isNaN(bal)) {
+        document.getElementById('output').innerText = " Please fill all account details correctly.";
+        return;
+      }
+
+      if (spin.length !== 6) {
+        document.getElementById('output').innerText = " PIN must be exactly 6 digits.";
+        return;
+      }
+
+      const exists = accounts.find(acc => acc.no === acno);
+      if (exists) {
+        document.getElementById('output').innerText = " Account with this number already exists.";
+        return;
+      }
+
+      const newAccount = new Bank(name, bal, acno, spin);
+      accounts.push(newAccount);
+      loggedin = false;
+      document.getElementById('output').innerText = " Account created successfully!\nNow login to view your account.";
+    }
+
+    function login() {
+      const racno = document.getElementById('racno').value.trim();
+      const rpin = document.getElementById('rpin').value.trim();
+
+      if (racno === '' || rpin === '') {
+        document.getElementById('output').innerText = " Please enter account number and PIN.";
+        return;
+      }
+
+      const match = accounts.find(acc => acc.no === racno && acc.spin === rpin);
+
+      if (match) {
+        useraccount = match;
+        loggedin = true;
+        document.getElementById('output').innerText = useraccount.display();
+      } else {
+        loggedin = false;
+        document.getElementById('output').innerText = " Incorrect account number or PIN.";
+      }
+    }
+
+    function withdraw() {
+      if (!loggedin || useraccount === null) {
+        document.getElementById('output').innerText = " Please login first to withdraw.";
+        return;
+      }
+
+      const amt = parseFloat(document.getElementById('amount').value);
+      if (isNaN(amt) || amt <= 0) {
+        document.getElementById('output').innerText = " Enter a valid amount to withdraw.";
+        return;
+      }
+      document.getElementById('output').innerText = useraccount.withdraw(amt);
+    }
+
+    function deposit() {
+      if (!loggedin || useraccount === null) {
+        document.getElementById('output').innerText = " Please login first to deposit.";
+        return;
+      }
+
+      const amt = parseFloat(document.getElementById('amount').value);
+      if (isNaN(amt) || amt <= 0) {
+        document.getElementById('output').innerText = " Enter a valid amount to deposit.";
+        return;
+      }
+      document.getElementById('output').innerText = useraccount.deposit(amt);
+    }
+
+    function display() {
+      if (!loggedin || useraccount === null) {
+        document.getElementById('output').innerText = " Please login first to check balance.";
+        return;
+      }
+      document.getElementById('output').innerText = useraccount.display();
+    }
+  </script>
+
+</body>
+</html>
